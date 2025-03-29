@@ -2,12 +2,12 @@ package ru.kata.spring.boot_security.demo.service;
 
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
-import ru.kata.spring.boot_security.demo.security.SecurityService;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -17,12 +17,14 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final SecurityService securityService;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, SecurityService securityService) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.securityService = securityService;
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -69,10 +71,11 @@ public class UserServiceImpl implements UserService {
         existingUser.setAge(user.getAge());
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            securityService.setPasswordForUser(existingUser);
+            passwordEncoder.encode(existingUser.getPassword());
         }
 
-        Set<Role> updatedRoles = securityService.getRoles(roleIds);
+        Set<Role> updatedRoles = roleService.findRolesByIds(roleIds);
+
         existingUser.getRoles().clear();
         existingUser.getRoles().addAll(updatedRoles);
 

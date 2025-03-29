@@ -24,31 +24,10 @@ import java.util.stream.Collectors;
 public class SecurityService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
 
     @Autowired
-    public SecurityService(PasswordEncoder passwordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
-        this.passwordEncoder = passwordEncoder;
+    public SecurityService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-    }
-
-    private Collection<? extends GrantedAuthority> roles(Set<Role> roles) {
-        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
-    }
-
-    public Set<Role> getRoles(List<Long> roleIds) {
-        return roleRepository.findByIdIn(roleIds != null ? roleIds : List.of());
-    }
-
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    public void setPasswordForUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
     }
 
     @Override
@@ -59,10 +38,7 @@ public class SecurityService implements UserDetailsService {
             throw new UsernameNotFoundException("Пользователь не найден: " + username);
         }
         Hibernate.initialize(user.getRoles());
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                roles(user.getRoles()));
+        return user;
     }
 
 }
