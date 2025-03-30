@@ -40,6 +40,7 @@ public class MainController {
         model.addAttribute("user", userDetails);
         User user = userService.getName(userDetails.getUsername());
         model.addAttribute("userroles", user.getRolesWithoutPrefix());
+        model.addAttribute("userrolesAsString", user.getRolesAsString());
         List<User> users = userServiceImpl.findAllUsers();
         model.addAttribute("username", user.getUsername());
         model.addAttribute("name", user.getName());

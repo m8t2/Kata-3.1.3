@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">>
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -49,6 +49,28 @@
             margin: 0 auto 0px;
         }
 
+        .form-fields {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-fields .form-label {
+            text-align: center;
+            width: 100%;
+        }
+
+        .form-fields .form-control,
+        .form-fields .form-select {
+            width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-fields button {
+            margin: 10px auto;
+            display: block;
+        }
+
     </style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -57,8 +79,7 @@
 
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#"><b th:text="${username}"></b> with roles: <b
-                th:text="${userroles}"></b></a>
+        <a class="navbar-brand" href="#"><b th:text="${username}"></b> with roles: <b th:text="${userrolesAsString}"></b></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -69,8 +90,7 @@
                     <form th:action="@{/logout}" method="post" style="margin: 0;">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit" class="nav-link btn btn-link"
-                                style="color: white; text-decoration: none;">Logout
-                        </button>
+                                style="color: white; text-decoration: none;">Logout</button>
                     </form>
                 </li>
             </ul>
@@ -78,20 +98,17 @@
     </div>
 </nav>
 
-
 <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary sidebar" style="width: 280px;">
     <ul class="nav nav-pills flex-column mb-auto">
-        <li th:if="${userroles.contains('ADMIN') or userroles.contains('admin')}">
+        <li sec:authorize="hasRole('ADMIN')">
             <a href="#" class="nav-link" onclick="showAdmin()">
-                <svg class="bi pe-none me-2" width="16" height="16">
-                </svg>
+                <svg class="bi pe-none me-2" width="16" height="16"></svg>
                 Admin
             </a>
         </li>
         <li>
             <a href="#" class="nav-link" onclick="showUser()">
-                <svg class="bi pe-none me-2" width="16" height="16">
-                </svg>
+                <svg class="bi pe-none me-2" width="16" height="16"></svg>
                 User
             </a>
         </li>
@@ -100,19 +117,17 @@
 
 <div class="main-content">
     <div id="adminContent" style="display: none;">
-        <h3 th:if="${userroles.contains('ADMIN')}">Admin Panel</h3>
-        <div th:if="${userroles.contains('ADMIN')}">
+        <h3>Admin Panel</h3>
+        <div>
             <nav class="nav nav-tabs" id="nav-tab" role="tablist">
                 <a class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab"
-                   aria-controls="nav-home" aria-selected="true">User table</a>
+                   aria-controls="nav-home" aria-selected="true">User Table</a>
                 <a class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" href="#nav-profile" role="tab"
                    aria-controls="nav-profile" aria-selected="false">New User</a>
             </nav>
             <div style="border: 2px solid #dddddd; border-radius: 4px">
-
-                <div class="tab-content" id="nav-tabContent" style="border: 2px">
-                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel"
-                         aria-labelledby="nav-home-tab">
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                         <div style="background: #f2f2f2; border-bottom: 2px solid #dddddd; padding: 15px">
                             <h3>All users</h3>
                         </div>
@@ -138,24 +153,22 @@
                                     <td th:text="${user.age}"></td>
                                     <td th:text="${user.username}"></td>
                                     <td>
-                                            <span th:each="roleName : ${user.getRolesWithoutPrefix()}"
-                                                  th:text="${roleName} + ' '"></span>
+                                        <span th:each="roleName : ${user.getRolesWithoutPrefix()}"
+                                              th:text="${roleName} + ' '"></span>
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                                 data-bs-target="#editUserModal"
                                                 th:attr="data-user-id=${user.id}, data-user-name=${user.name}, data-user-secondname=${user.secondname},
                                                      data-user-age=${user.age}, data-user-username=${user.username}"
-                                                onclick="fillEditModal(this)">Edit
-                                        </button>
+                                                onclick="fillEditModal(this)">Edit</button>
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                                 data-bs-target="#deleteUserModal"
                                                 th:attr="data-user-id=${user.id}, data-user-name=${user.name}, data-user-secondname=${user.secondname},
-                     data-user-age=${user.age}, data-user-username=${user.username}"
-                                                onclick="fillDeleteModal(this)">Delete
-                                        </button>
+                                                     data-user-age=${user.age}, data-user-username=${user.username}"
+                                                onclick="fillDeleteModal(this)">Delete</button>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -163,70 +176,50 @@
                         </div>
                     </div>
 
-
                     <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-                        <div style="background: #f2f2f2; padding: 15px; border-bottom: 2px solid #dddddd; ">
+                        <div style="background: #f2f2f2; border-bottom: 2px solid #dddddd; padding: 15px">
                             <h3>Add new user</h3>
                         </div>
-                        <div class="row">
-                            <div class="col"></div>
-                            <div class="col" style="padding: 15px">
-                                <form th:action="@{/admin/add}" method="post" class="mt-4">
-                                    <input type="hidden" th:name="${_csrf.parameterName}"
-                                           th:value="${_csrf.token}"/>
-
-                                    <div class="mb-3">
-                                        <label for="newName" class="form-label">Name</label>
-                                        <input type="text" class="form-control" id="newName" name="name" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="newSecondname" class="form-label">Last Name</label>
-                                        <input type="text" class="form-control" id="newSecondname" name="secondname"
-                                               required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="newAge" class="form-label">Age</label>
-                                        <input type="number" class="form-control" id="newAge" name="age" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="newUsername" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="newUsername" name="username"
-                                               required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="newPassword" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="newPassword" name="password"
-                                               required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Roles</label>
-                                        <select class="form-select" name="roles" multiple>
-                                            <option th:each="role : ${allRoles}"
-                                                    th:value="${role.name}"
-                                                    th:text="${role.name.replace('ROLE_', '')}">
-                                            </option>
-                                        </select>
-                                    </div>
-
-
-                                    <button type="submit" class="btn btn-success">Add new user</button>
-                                </form>
-                            </div>
-
-                            <div class="col"></div>
+                        <div class="form-fields" style="padding: 15px" >
+                            <form th:action="@{/admin/add}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <div class="mb-3">
+                                    <label for="addName" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="addName" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addSecondname" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="addSecondname" name="secondname" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addAge" class="form-label">Age</label>
+                                    <input type="number" class="form-control" id="addAge" name="age" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addUsername" class="form-label">Email</label>
+                                    <input type="text" class="form-control" id="addUsername" name="username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addPassword" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="addPassword" name="password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Roles</label>
+                                    <select class="form-select" name="roleIds" multiple required>
+                                        <option th:each="role : ${allRoles}" th:value="${role.id}"
+                                                th:text="${role.name.replace('ROLE_', '')}"></option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-success">Add new user</button>
+                            </form>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Секция User -->
     <div id="userContent" style="display: none;">
         <h2>User Information-page</h2>
         <div style="border: 2px solid #dddddd; border-radius: 5px;">
@@ -311,7 +304,6 @@
     </div>
 </div>
 
-
 <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <form th:action="@{/admin/delete}" method="post">
@@ -352,7 +344,7 @@
     </div>
 </div>
 
-
+<!-- Скрипты -->
 <script>
     function showAdmin() {
         document.getElementById('adminContent').style.display = 'block';
@@ -370,7 +362,6 @@
         const userSecondname = button.getAttribute('data-user-secondname');
         const userAge = button.getAttribute('data-user-age');
         const userUsername = button.getAttribute('data-user-username');
-        const userRoles = button.getAttribute('data-user-roles') ? button.getAttribute('data-user-roles').split(',') : [];
 
         document.getElementById('editId').value = userId;
         document.getElementById('editName').value = userName;
@@ -378,11 +369,6 @@
         document.getElementById('editAge').value = userAge;
         document.getElementById('editUsername').value = userUsername;
         document.getElementById('editPassword').value = ''; // Очищаем пароль
-
-        const roleSelect = document.getElementById('editRoles');
-        Array.from(roleSelect.options).forEach(option => {
-            option.selected = userRoles.includes(option.value);
-        });
     }
 
     function fillDeleteModal(button) {
@@ -398,8 +384,6 @@
         document.getElementById('deleteAge').value = userAge;
         document.getElementById('deleteUsername').value = userUsername;
     }
-
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
