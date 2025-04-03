@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.service;
 
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,6 @@ public class UserServiceImpl implements UserService {
     public User findUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id " + id + " не найден"));
-        Hibernate.initialize(user.getRoles());
         return user;
     }
 
@@ -50,14 +50,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username);
     }
 
+    @Override
     @Transactional
-    public void addUser(User user) {
+    public void addUser(User user, List<Long> roleIds) {
+        roleService.SetUserRoles(roleIds, user);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
+        userRepository.delete(user);
     }
 
 

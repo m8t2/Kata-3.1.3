@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.RoleServiceImpl;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
@@ -17,7 +18,7 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
-    private final RoleServiceImpl roleService;
+    private final RoleService roleService;
 
     public AdminController(UserService userService, RoleServiceImpl roleService) {
         this.userService = userService;
@@ -26,9 +27,7 @@ public class AdminController {
 
     @PostMapping("/admin/delete")
     public String deleteUserPost(@RequestParam("id") Long id) {
-        if (userService.existsUser(id)) {
-            userService.deleteUser(id);
-        }
+        userService.deleteUser(id);
         return "redirect:/index";
     }
 
@@ -61,9 +60,7 @@ public class AdminController {
             return "index";
         }
 
-        roleService.SetUserRoles(roleIds, user);
-
-        userService.addUser(user);
+        userService.addUser(user, roleIds);
         return "redirect:/index";
     }
 }

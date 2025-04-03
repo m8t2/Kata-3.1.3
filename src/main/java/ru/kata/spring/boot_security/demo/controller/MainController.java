@@ -7,7 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.RoleServiceImpl;
+import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
 import java.util.List;
@@ -16,13 +18,11 @@ import java.util.List;
 @Controller
 public class MainController {
 
-    private final UserServiceImpl userServiceImpl;
-    private final RoleServiceImpl roleService;
-    private final UserServiceImpl userService;
+    private final RoleService roleService;
+    private final UserService userService;
 
     @Autowired
-    public MainController(UserServiceImpl userDetailsService, RoleServiceImpl roleService, UserServiceImpl userService) {
-        this.userServiceImpl = userDetailsService;
+    public MainController(RoleServiceImpl roleService, UserServiceImpl userService) {
         this.roleService = roleService;
         this.userService = userService;
     }
@@ -41,7 +41,7 @@ public class MainController {
         User user = userService.getName(userDetails.getUsername());
         model.addAttribute("userroles", user.getRolesWithoutPrefix());
         model.addAttribute("userrolesAsString", user.getRolesAsString());
-        List<User> users = userServiceImpl.findAllUsers();
+        List<User> users = userService.findAllUsers();
         model.addAttribute("username", user.getUsername());
         model.addAttribute("name", user.getName());
         model.addAttribute("secondname", user.getSecondname());
